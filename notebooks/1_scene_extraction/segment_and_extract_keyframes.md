@@ -1,8 +1,8 @@
 1. Scenes segmentation
-Using notebook `scene-segmentation.ipynb` to segment the video into scenes.
+Using notebook `scene_segmentation.ipynb` to segment the video into scenes.
 
 2. Keyframes extraction
-Using notebook `keyframes-extraction.ipynb` to extract keyframes from the segmented scenes.
+Using notebook `keyframes_extraction.ipynb` to extract keyframes from the segmented scenes.
 ---
 - Input directory structure:
     ```bash
