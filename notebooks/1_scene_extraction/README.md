@@ -1,7 +1,9 @@
-1. Scenes segmentation
+# 1. Scenes segmentation
 Using notebook `scene_segmentation.ipynb` to segment the video into scenes.
 
-2. Keyframes extraction
+Scenes extracted in this link: [Kaggle](https://www.kaggle.com/datasets/danielway17/scenes-segment)
+
+# 2. Keyframes extraction
 Using notebook `keyframes_extraction.ipynb` to extract keyframes from the segmented scenes.
 ---
 - Input directory structure:
