@@ -42,3 +42,52 @@ The contents inside `001.json` as will be follow:
 ]
 ```
 
+# 2. Metadata Extraction
+---
+## 2.1 Object Detection
+
+Object detection on video frames using YOLOv8 pre-trained on Open Images V7 dataset.
+Spatial Locality Encoding is used to enhance the detection results.
+Divide the image using 7x7 grid lines, the detected objects will be calculated by the intersection of the bbox and the grid_bbox.
+This not only helps identify the subject but also determines where the subject is in the frame.
+Also extracts the number of classes and the types of classes.
+
+Input: Keyframes extracted
+
+
+## 2.2 Colors encode
+
+Encode colors in the video frames using grid-based encoding.
+Similar to object detection, the image is divided into a 7x7 grid.
+The colors in each grid cell are encoded, providing a spatial representation of the color distribution in the frame.
+
+Input: Keyframes extracted
+
+## 2.3. Tag
+Using RAM (Reccognize Anything Model) for tagging objects in the video frames.
+
+
+Input: Keyframes extracted
+
+
+---
+### Output:
+```bash
+./context_encoded/
+└── bboxes_encoded/
+    └── L21_a/
+        ├── V001.txt
+        ├──...
+└── classes_encoded/
+    └── L21_a/
+        ├── V001.txt
+        ├──...
+└── number_encoded/
+    └── L21_a/
+        ├── V001.txt
+        ├──...
+└── tags_encoded/
+    └── L21_a/
+        ├── V001.txt
+        ├──...
+```
