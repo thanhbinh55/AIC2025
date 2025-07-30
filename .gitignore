@@ -58,4 +58,8 @@ env/
 .temp/
 
 # Zip files
-*.zip
+*.Zip
+
+/static/images/Keyframes/
+
+/dict/
