@@ -62,4 +62,7 @@ env/
 
 /static/images/Keyframes/
 
-/dict/
+
+dict/audio_detection/
+dict/metadata/
+dict/SceneJSON/
