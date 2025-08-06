@@ -57,12 +57,10 @@ env/
 .tmp/
 .temp/
 
-# Zip files
-*.Zip
+*.bin
+*.zip
+test.ipynb
 
-/static/images/Keyframes/
 
-
-dict/audio_detection/
-dict/metadata/
-dict/SceneJSON/
+dict/
+frontend/public/data/Keyframes/
