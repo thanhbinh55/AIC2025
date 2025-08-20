@@ -7,8 +7,6 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
 from utils.parse_frontend import parse_data
@@ -22,7 +20,7 @@ from utils.models import (
     PanelSearchRequest,
     FeedbackRequest,
     TagRequest,
-    TranslateRequest
+    TranslateRequest,
 )
 
 # Define paths
@@ -45,9 +43,6 @@ TotalIndexList = np.array(list(range(len(DictImagePath)))).astype("int64")
 
 with open(scene_path, "r") as f:
     Sceneid2info = json.load(f)
-
-# with open("dict/map_keyframes.json", "r") as f:
-#     KeyframesMapper = json.load(f)
 
 with open(video_division_path, "r") as f:
     VideoDivision = json.load(f)
@@ -96,24 +91,24 @@ app = FastAPI()
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for development; restrict in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Setup Jinja2Templates and static files
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# # Setup Jinja2Templates and static files
+# templates = Jinja2Templates(directory="templates")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Define API endpoints
-@app.get("/", response_class=HTMLResponse)
-async def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+# # Define API endpoints
+# @app.get("/", response_class=HTMLResponse)
+# async def root(request: Request):
+#     return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get("/data")
-async def index():
+def index():
     pagefile = []
     for id, value in DictImagePath.items():
         if int(id) > 500:
@@ -124,21 +119,19 @@ async def index():
 
 
 @app.get("/imgsearch")
-async def image_search(k: int, imgid: int):
+def image_search(k: int, imgid: int):
     print("image search")
     lst_scores, list_ids, _, list_image_paths = CosineFaiss.image_search(imgid, k=k)
-    data = group_result_by_video(
-        lst_scores, list_ids, list_image_paths
-    )
+    data = group_result_by_video(lst_scores, list_ids, list_image_paths)
     return data
 
 
 @app.post("/textsearch")
-async def text_search(request: TextSearchRequest):
+def text_search(request: TextSearchRequest):
     print("text search")
     search_space_index = request.search_space
     k = request.k
-    clip = request.clip
+    nomic = request.nomic
     clipv2 = request.clipv2
     text_query = request.textquery
     range_filter = request.range_filter
@@ -168,10 +161,10 @@ async def text_search(request: TextSearchRequest):
         index = np.intersect1d(index, SearchSpace[search_space_index])
     k = min(k, len(index))
 
-    if clip and clipv2:
+    if nomic and clipv2:
         model_type = "both"
-    elif clip:
-        model_type = "clip"
+    elif nomic:
+        model_type = "nomic"
     else:
         model_type = "clipv2"
 
@@ -194,14 +187,14 @@ async def text_search(request: TextSearchRequest):
         )
     else:
         if model_type == "both":
-            scores_clip, list_clip_ids, _, _ = CosineFaiss.text_search(
-                text_query, index=index, k=k, model_type="clip"
+            scores_nomic, list_nomic_ids, _, _ = CosineFaiss.text_search(
+                text_query, index=index, k=k, model_type="nomic"
             )
             scores_clipv2, list_clipv2_ids, _, _ = CosineFaiss.text_search(
                 text_query, index=index, k=k, model_type="clipv2"
             )
             lst_scores, list_ids = merge_searching_results_by_addition(
-                [scores_clip, scores_clipv2], [list_clip_ids, list_clipv2_ids]
+                [scores_nomic, scores_clipv2], [list_nomic_ids, list_clipv2_ids]
             )
             infos_query = [
                 CosineFaiss.id2img.get(idx)
@@ -213,15 +206,13 @@ async def text_search(request: TextSearchRequest):
             lst_scores, list_ids, _, list_image_paths = CosineFaiss.text_search(
                 text_query, index=index, k=k, model_type=model_type
             )
-        data = group_result_by_video(
-            lst_scores, list_ids, list_image_paths
-        )
+        data = group_result_by_video(lst_scores, list_ids, list_image_paths)
 
     return data
 
 
 @app.post("/panel")
-async def panel(request: PanelSearchRequest):
+def panel(request: PanelSearchRequest):
     print("panel search")
     k = request.k
     search_space_index = request.search_space
@@ -250,7 +241,7 @@ async def panel(request: PanelSearchRequest):
     k = min(k, len(index))
 
     # Parse json input
-    object_input = parse_data(request.dict(), VisualEncoder)
+    object_input = parse_data(request.model_dump(), VisualEncoder)
     ocr_input = None if request.ocr == "" else request.ocr
     asr_input = None if request.asr == "" else request.asr
 
@@ -267,14 +258,12 @@ async def panel(request: PanelSearchRequest):
         useid=request.useid,
     )
 
-    data = group_result_by_video(
-        lst_scores, list_ids, list_image_paths
-    )
+    data = group_result_by_video(lst_scores, list_ids, list_image_paths)
     return data
 
 
 @app.post("/getrec")
-async def getrec(request: TagRequest):
+def getrec(request: TagRequest):
     print("get tag recommendation")
     k = 50
     text_query = request.text
@@ -283,21 +272,21 @@ async def getrec(request: TagRequest):
 
 
 @app.get("/relatedimg")
-async def related_img(imgid: int):
+def related_img(imgid: int):
     print("related image")
     image_info = DictImagePath[imgid]
     image_path = image_info["image_path"]
     scene_idx = image_info["scene_idx"].split("/")
 
     video_info = copy.deepcopy(Sceneid2info[scene_idx[0]][scene_idx[1]])
-    video_url = video_info["video_metadata"]["watch_url"]
+    # video_url = video_info["video_metadata"]["watch_url"]
     video_range = video_info[scene_idx[2]][scene_idx[3]]["shot_time"]
 
     near_keyframes = video_info[scene_idx[2]][scene_idx[3]]["lst_keyframe_paths"]
     near_keyframes.remove(image_path)
 
     data = {
-        "video_url": video_url,
+        # "video_url": video_url,
         "video_range": video_range,
         "near_keyframes": near_keyframes,
     }
@@ -305,7 +294,7 @@ async def related_img(imgid: int):
 
 
 @app.get("/getvideoshot")
-async def get_video_shot(imgid: Optional[str] = None):
+def get_video_shot(imgid: Optional[str] = None):
     print("get video shot")
 
     if imgid == "undefined" or imgid is None:
@@ -329,7 +318,9 @@ async def get_video_shot(imgid: Optional[str] = None):
         lst_keyframe_idxs = []
         for img_path in shots[shot_key]["lst_keyframe_paths"]:
             data_part, video_id, frame_id = (
-                img_path.replace("/data/KeyFrames/", "").replace(".webp", "").split("/")
+                img_path.replace("/frontend/public/data/Keyframes/", "")
+                .replace(".jpg", "")
+                .split("/")
             )
             key = f"{data_part}_{video_id}".replace("_extra", "")
             frame_id = int(frame_id)
@@ -347,7 +338,7 @@ async def get_video_shot(imgid: Optional[str] = None):
 
 
 @app.post("/feedback")
-async def feed_back(request: FeedbackRequest):
+def feed_back(request: FeedbackRequest):
     k = request.k
     prev_result = request.videos
     lst_pos_vote_idxs = request.lst_pos_idxs
@@ -355,14 +346,12 @@ async def feed_back(request: FeedbackRequest):
     lst_scores, list_ids, _, list_image_paths = CosineFaiss.reranking(
         prev_result, lst_pos_vote_idxs, lst_neg_vote_idxs, k
     )
-    data = group_result_by_video(
-        lst_scores, list_ids, list_image_paths
-    )
+    data = group_result_by_video(lst_scores, list_ids, list_image_paths)
     return data
 
 
 @app.post("/translate")
-async def translate(request: TranslateRequest):
+def translate(request: TranslateRequest):
     text_query = request.textquery
     text_query_translated = CosineFaiss.translater(text_query)
     return text_query_translated
