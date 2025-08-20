@@ -1,8 +1,10 @@
 import googletrans
+import asyncio
 
-class Translation():
-    def __init__(self, from_lang='vi', to_lang='en'):
-        # The class Translation is a wrapper for the two translation libraries, googletrans and translate. 
+
+class Translation:
+    def __init__(self, from_lang="vi", to_lang="en"):
+        # The class Translation is a wrapper for the two translation libraries, googletrans and translate.
         self.__to_lang = to_lang
         self.translator = googletrans.Translator()
 
@@ -17,4 +19,5 @@ class Translation():
         :return: The translated text.
         """
         text = self.preprocessing(text)
-        return self.translator.translate(text, dest=self.__to_lang).text
+        result = self.translator.translate(text, dest=self.__to_lang)
+        return result.text

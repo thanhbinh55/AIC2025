@@ -1,11 +1,12 @@
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 
+
 # Define Pydantic models for request validation
 class TextSearchRequest(BaseModel):
     search_space: int
     k: int
-    clip: bool
+    nomic: bool
     clipv2: bool
     textquery: str
     range_filter: int
@@ -26,7 +27,9 @@ class PanelSearchRequest(BaseModel):
     ignore_idxs: Optional[List[int]] = None
     ocr: str = ""
     asr: str = ""
-    object: Optional[Dict[str, Any]] = None
+    dragObject: Optional[List[Dict[str, Any]]] = []
+    tags: Optional[List[str]] = []
+    amount: Optional[str] = ""
 
 
 class FeedbackRequest(BaseModel):

@@ -6,7 +6,8 @@ import json
 import glob
 import faiss
 import numpy as np
-from nomic import embed 
+from sentence_transformers import SentenceTransformer
+
 from utils.nlp_processing import Translation
 from utils.combine_utils import merge_searching_results_by_addition
 from utils.ocr_retrieval_engine.ocr_retrieval import ocr_retrieval
@@ -34,10 +35,19 @@ class MyFaiss:
         self.img_id2audio_id = self.load_json_file(img2audio_json_path)
         self.translater = Translation()
         self.__device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        # Load CLIPv2 model
         self.clipv2_model, _, _ = open_clip.create_model_and_transforms(
             "ViT-L-14", device=self.__device, pretrained="datacomp_xl_s13b_b90k"
         )
         self.clipv2_tokenizer = open_clip.get_tokenizer("ViT-L-14")
+
+        # Load Nomic model locally
+        self.nomic_model = SentenceTransformer(
+            "nomic-ai/nomic-embed-text-v1.5",
+            trust_remote_code=True,
+            device=self.__device,
+        )
 
     def load_json_file(self, json_path: str):
         with open(json_path, "r") as f:
@@ -63,15 +73,25 @@ class MyFaiss:
 
         ###### TEXT FEATURES EXTRACTING ######
         if model_type == "nomic":
-            output = embed.text(
-                texts=[text], model="nomic-embed-text-v1.5", task_type="search_query"
-            )
-            text_features = np.array(output["embeddings"]).astype(np.float32)
+            try:
+                # Use local nomic model instead of API
+                sentence = [f'search_query: {text}']
+                text_features = self.nomic_model.encode(
+                    sentence
+                )
+                text_features = np.array(text_features).astype(np.float32)
+            except Exception as e:
+                print(f"Error occurred while extracting text features: {e}")
+                text_features = np.zeros((1, 768), dtype=np.float32)
         else:
-            text = self.clipv2_tokenizer([text]).to(self.__device)
-            text_features = self.clipv2_model.encode_text(text)
-            text_features /= text_features.norm(dim=-1, keepdim=True)
-            text_features = text_features.cpu().detach().numpy().astype(np.float32)
+            try:
+                text = self.clipv2_tokenizer([text]).to(self.__device)
+                text_features = self.clipv2_model.encode_text(text)
+                text_features /= text_features.norm(dim=-1, keepdim=True)
+                text_features = text_features.cpu().detach().numpy().astype(np.float32)
+            except Exception as e:
+                print(f"Error occurred while extracting text features: {e}")
+                text_features = np.zeros((1, 768), dtype=np.float32)
 
         ###### SEARCHING #####
         if model_type == "nomic":
@@ -247,7 +267,7 @@ class MyFaiss:
         list_image_paths = [info["image_path"] for info in infos_query]
 
         return lst_scores, list_ids, infos_query, list_image_paths
-    
+
     def show_images(self, image_paths):
         import matplotlib.pyplot as plt
         from PIL import Image
@@ -256,7 +276,7 @@ class MyFaiss:
         for ax, img_path in zip(axes.flatten(), image_paths):
             img = Image.open(img_path)
             ax.imshow(img)
-            ax.axis('off')
+            ax.axis("off")
         plt.tight_layout()
         plt.show()
 

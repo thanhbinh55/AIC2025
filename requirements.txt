@@ -1,5 +1,5 @@
 uvicorn[standard]
-fastapi
+fastapi[standard]
 pydantic
 tqdm
 nomic
@@ -16,3 +16,4 @@ langdetect
 googletrans
 transformers
 sentence-transformers
+rank-bm25

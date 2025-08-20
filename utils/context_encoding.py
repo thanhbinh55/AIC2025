@@ -2,6 +2,7 @@ import cv2
 import torch
 import yaml
 import numpy as np
+import os
 import matplotlib.pyplot as plt
 from torchvision.ops import box_iou
 
@@ -28,9 +29,15 @@ class VisualEncoding:
     ):
 
         if classes is None:
-            data = yaml.safe_load("open-images-v7.yaml")
-            classes = tuple(data['classes'].values())
-            
+            with open(
+                os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)), "open-images-v7.yaml"
+                ),
+                "r",
+            ) as f:
+                data = yaml.safe_load(f)
+            classes = tuple(data["names"].values())
+
         self.classes = classes
         self.colors = colors
         self.classes2idx = dict()
