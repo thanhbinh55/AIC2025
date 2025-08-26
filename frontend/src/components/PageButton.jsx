@@ -4,7 +4,7 @@ import {
   AiFillCaretRight,
 } from "react-icons/ai";
 
-function PageButton({ totalPage, autoFetch, isFilter, showAutoFetch, page, setPage, autoIgnore, handleAutoIgnore}) {
+function PageButton({ totalPage, autoFetch, isFilter, showAutoFetch, page, setPage, DivID, autoIgnore, handleAutoIgnore }) {
   useEffect(() => {
     if (DivID === "images" && autoIgnore && !isFilter) {
       if ((page === totalPage - 3 || (0 < totalPage && totalPage < 3)) && autoIgnore)

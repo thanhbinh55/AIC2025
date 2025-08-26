@@ -2,7 +2,6 @@ import { Fragment, useState } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { HiChevronUpDown } from "react-icons/hi2";
 import { AiOutlineCheck } from "react-icons/ai";
-import Questions from "../components/Questions.jsx";
 
 const people = [
   { name: "No Filter" },

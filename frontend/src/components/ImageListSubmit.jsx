@@ -4,7 +4,7 @@ import { BsArrowsFullscreen } from "react-icons/bs";
 import { BiSolidVideos } from "react-icons/bi";
 import { AiOutlineDelete, AiOutlineSelect } from "react-icons/ai";
 
-function ImageListSubmit({
+function ImageList({
   imagepath,
   id,
   id_show,
@@ -78,4 +78,4 @@ function ImageListSubmit({
   );
 }
 
-export default ImageListSubmit;
+export default ImageList;

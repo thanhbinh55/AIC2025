@@ -7,7 +7,7 @@ function Questions({ questions, username, setQuestionName, isLoading }) {
     <>
       <div
         key={questions}
-        className="w-80 top-10 left-0 h-80 bg-slate-900 rounded-md absolute flex-col gap-y-1
+        className="w-80 top-10 left-0 h-80 bg-slate-900 rounded-md absolute flex-col gap-1y
          content-start p-1"
         id="questions"
         onClick={(e) => {

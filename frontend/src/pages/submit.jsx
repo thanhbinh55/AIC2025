@@ -13,6 +13,7 @@ import {
 import FullScreen from "../components/FullScreen";
 import Questions from "../components/Questions";
 import Lock from "../components/Lock";
+// import download from "../helper/download";
 import Switch from "../components/Switch";
 
 const io = require("socket.io-client");
@@ -22,7 +23,6 @@ const socket = io(socket_url, {
     "ngrok-skip-browser-warning": "69420",
   },
 });
-
 function submit() {
   const [questionName, setQuestionName] = useState("");
   const [questions, setQuestions] = useState([]);
@@ -37,6 +37,21 @@ function submit() {
   const [activeReorder, setActiveReorder] = useState(false);
   const [infoDialog, setInfoDialog] = useState({});
   const [isShown, setIsShown] = useState(false);
+
+  // const [testList, setTestList] = useState([
+  //   { path: "/tree.jpg", id: 0 },
+  //   { path: "/tree.jpg", id: 2 },
+  //   { path: "/tree.jpg", id: 3 },
+  //   { path: "/tree.jpg", id: 4 },
+  //   { path: "/tree.jpg", id: 5 },
+  //   { path: "/tree.jpg", id: 6 },
+  //   { path: "/tree.jpg", id: 7 },
+  //   { path: "/shoes.jpg", id: 8 },
+  //   { path: "/tree.jpg", id: 9 },
+  //   { path: "/tree.jpg", id: 10 },
+  //   { path: "/tree.jpg", id: 11 },
+  //   { path: "/tree.jpg", id: 12 },
+  // ]);
 
   const fetchGetObj = {
     method: "get",
@@ -284,7 +299,7 @@ function submit() {
         id={1}
         id_show={1}
         toggleFullScreen={() => {}}
-        /> */}
+      /> */}
         <div className="text-center ml-auto mb-4 flex gap-4 items-center">
           {/* <button
             onClick={() => {

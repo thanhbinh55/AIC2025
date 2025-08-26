@@ -1,6 +1,6 @@
 # 1. OCR
 ---
-Extracting text from video frames using Paddle OCR.
+Extracting text from video frames using Easy OCR.
 
 Input:
 ```bash
@@ -46,7 +46,7 @@ The contents inside `001.json` as will be follow:
 ---
 ## 2.1 Object Detection
 
-Object detection on video frames using YOLOv8 pre-trained on Open Images V7 dataset.
+Object detection on video frames using YOLOv8 pre-trained on Open COCO dataset.
 Spatial Locality Encoding is used to enhance the detection results.
 Divide the image using 7x7 grid lines, the detected objects will be calculated by the intersection of the bbox and the grid_bbox.
 This not only helps identify the subject but also determines where the subject is in the frame.

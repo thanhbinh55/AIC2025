@@ -9,7 +9,7 @@ def group_result_by_video(lst_scores, list_ids, list_image_paths):
         data_part, video_id, frame_id = (
             image_path.replace("/frontend/public/data/Keyframes/", "").replace(".jpg", "").split("/")
         )
-        key = f"{data_part}_{video_id}".replace("_extra", "")
+        key = f"{data_part}_{video_id}".replace("_extract", "")
 
         frame_id = int(frame_id)
 

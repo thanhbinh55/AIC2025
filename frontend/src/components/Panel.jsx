@@ -1,14 +1,14 @@
 import { useState } from "react";
-import React from "react";
-import { icons } from "../helper/icons.js";
-import { web_url, socket_url } from "../helper/web_url.js";
-import Icon from "./Icon";
 import SearchTag from "./SearchTag";
-import DragObject from "./DragObject";
+import React from "react";
+import DragObject from "./DragObject.jsx";
+import { icons } from "../helper/icons.js";
+import Icon from "./Icon.jsx";
+import { web_url, socket_url } from "../helper/web_url.js";
+import ImageListVideoPanel from ".//ImageListVideoPanel.jsx";
 import GetTagRec from "./GetTagRec";
 import LoadingIcon from "./LoadingIcon";
-import ImageListVideoPanel from "./ImageListVideoPanel";
-import VideoWrapper from "./VideoWrapper";
+import VideoWrapper from "./VideoWrapper.jsx";
 import PageButton from "./PageButton";
 
 const VIDEO_PER_PAGE = 7;
@@ -282,7 +282,6 @@ function panel({
         </div>
       </div>
       <div className="ocr flex gap-1 w-[728px] mb-1">
-        {/* OCR */}
         <div className="relative flex-auto">
           <input
             tabIndex={3}
@@ -292,7 +291,6 @@ function panel({
             onChange={(e) => setOcr(e.target.value)}
           ></input>
         </div>
-        {/* ARS */}
         <div className="relative flex-auto">
           <input
             tabIndex={3}

@@ -10,7 +10,19 @@ from torchvision.ops import box_iou
 class VisualEncoding:
     def __init__(
         self,
-        classes=None,
+        classes=('person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train',
+                           'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign',
+                           'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep',
+                           'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella',
+                           'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard',
+                           'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard',
+                           'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork',
+                           'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange',
+                           'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair',
+                           'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv',
+                           'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave',
+                           'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase',
+                           'scissors', 'teddy bear', 'hair drier', 'toothbrush'),
         colors=(
             "black",
             "blue",
@@ -27,16 +39,6 @@ class VisualEncoding:
         row_str=["0", "1", "2", "3", "4", "5", "6"],
         col_str=["a", "b", "c", "d", "e", "f", "g"],
     ):
-
-        if classes is None:
-            with open(
-                os.path.join(
-                    os.path.dirname(os.path.abspath(__file__)), "open-images-v7.yaml"
-                ),
-                "r",
-            ) as f:
-                data = yaml.safe_load(f)
-            classes = tuple(data["names"].values())
 
         self.classes = classes
         self.colors = colors
