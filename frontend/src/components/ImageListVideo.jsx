@@ -4,7 +4,7 @@ import { BsArrowsFullscreen, BsDatabaseAdd } from "react-icons/bs";
 import { BiFileFind, BiSolidVideos, BiHide } from "react-icons/bi";
 import Image from "next/image";
 
-function ImageListVideo({
+function ImageList({
   imagepath,
   id,
   handleKNN,
@@ -176,4 +176,4 @@ function ImageListVideo({
   );
 }
 
-export default ImageListVideo;
+export default ImageList;

@@ -8,9 +8,9 @@
   height: 5px;
 }
 
-html {
+/* html {
   scroll-behavior: smooth;
-}
+} */
 
 /* Track */
 ::-webkit-scrollbar-track {

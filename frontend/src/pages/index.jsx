@@ -14,6 +14,9 @@ import Lock from "../components/Lock.jsx";
 import PageButton from "../components/PageButton.jsx";
 import Info from "../components/Info.jsx";
 import dynamic from "next/dynamic";
+const SpeechToText = dynamic(() => import("../Library/SpeechToText"), {
+  ssr: false,
+});
 
 let linksArray = [];
 let currentK;
@@ -69,14 +72,14 @@ function index() {
     }),
   };
 
-  useEffect(() => {
-   fetch(`${web_url}/data`, fetchGetObj)
-    .then((data) => data.json())
-    .then((res) => {
-     handleData(res);
-    })
-    .catch((e) => console.log(`/data fecth error ${e}`));
-  }, []);
+  // useEffect(() => {
+  //  fetch(`${web_url}/data`, fetchGetObj)
+  //   .then((data) => data.json())
+  //   .then((res) => {
+  //    handleData(res);
+  //   })
+  //   .catch((e) => console.log(`/data fecth error ${e}`));
+  // }, []);
 
   const getOwnedQuestions = (username) => {
     setQuestionsLoading(true);
@@ -694,7 +697,7 @@ function index() {
                 document.getElementById("translate").style.display = "block";
               }}
             ></input>
-            {/* <div className=" mr-2 w-20 h-10 gap-1 flex space-around items-center">
+            <div className=" mr-2 w-20 h-10 gap-1 flex space-around items-center">
               <SpeechToText setQuery={setQuery} />
               <button
                 type="button"
@@ -707,7 +710,7 @@ function index() {
               >
                 <AiOutlineSearch color={"black"} fontSize="1.5rem" />
               </button>
-            </div> */}
+            </div>
           </div>
           <div className="checkboxes flex items-center pl-2 h-fit gap-1">
             <Tabs
@@ -789,10 +792,7 @@ function index() {
                 <span className="">AutoI</span>
               </label>
             </div>
-            <div 
-              id="nomic" 
-              className="flex items-center "
-            >
+            <div id="nomic" className="flex items-center ">
               <input
                 checked={nomic}
                 onChange={(e) => {
@@ -826,7 +826,7 @@ function index() {
                 htmlFor="Clipv2"
                 className="cursor-pointer pl-0.5 text-slate-300"
               >
-                <span className="text-lime-400">CLIPv2</span>
+                <span className="text-orange-400">v2</span>
               </label>
             </div>
             <div className="h-fit w-fit flex flex-col relative">

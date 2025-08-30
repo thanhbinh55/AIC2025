@@ -1,6 +1,7 @@
 uvicorn[standard]
 fastapi[standard]
 pydantic
+python-socketio
 tqdm
 nomic
 regex
@@ -17,3 +18,4 @@ googletrans
 transformers
 sentence-transformers
 rank-bm25
+einops==0.8.1

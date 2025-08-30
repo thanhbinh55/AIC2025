@@ -2,7 +2,7 @@ import React from "react";
 import {
   AiFillPlayCircle,
 } from "react-icons/ai";
-import ImageListRelated from "./ImageListRelated"
+import ImageListRelated from "./ImageListRelated";
 import Image from 'next/image'
 
 

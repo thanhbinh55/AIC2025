@@ -1,7 +1,14 @@
 import React from 'react'
 import {BiHide } from "react-icons/bi";
 
-function VideoWrapper({ children, id, handleIgnore, filterFB }) {
+
+
+function VideoWrapper({ children, id,
+  // lst_idxs,
+  handleIgnore, 
+  filterFB
+  // isIgnored
+}) {
   const styles = {
     flex: filterFB ? 'none' : ''
   }
@@ -29,13 +36,13 @@ function VideoWrapper({ children, id, handleIgnore, filterFB }) {
       </div>
       <div
         style={styles}
-        className={`relative flex h-max 
+        classname={`relative flex h-max 
         ${filterFB ? 'flex-nowrap flex-none bg-slate-500': 'flex-wrap'}`}
       >
         {children}
       </div>
     </div>
-  );  
+  );
 }
 
-export default VideoWrapper;
+export default VideoWrapper
