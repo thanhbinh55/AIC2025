@@ -4,9 +4,13 @@ import socketio
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any
+from utils.models import (
+    UserRequest,
+    UsernameRequest,
+    QuestionNameRequest
+)
 
 # Create FastAPI app
 app = FastAPI()
@@ -14,25 +18,39 @@ app = FastAPI()
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "*",
+        "https://*.ngrok-free.app",
+        "http://localhost:3000",
+        "http://localhost",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Create Socket.IO server
-sio = socketio.AsyncServer(async_mode='asgi', cors_allowed_origins="*")
+sio = socketio.AsyncServer(
+    async_mode="asgi",
+    cors_allowed_origins=[
+        "*",
+        "https://*.ngrok-free.app",
+        "http://localhost:3000",
+        "http://localhost",
+    ],
+    ping_timeout=60,
+    ping_interval=25,
+)
 
 ###################### Initialize dict ########################
-json_path = "dict/id2img_fps.json"
+json_path = "dict/id2img.json"
 back_up_folder = "back_up"
 if not os.path.exists(back_up_folder):
     os.mkdir(back_up_folder)
 with open(json_path, "r") as f:
     DictImagePath = json.load(f)
     DictImagePath = {int(k): v for k, v in DictImagePath.items()}
-with open("dict/map_keyframes.json", "r") as f:
-    KeyframesMapper = json.load(f)
 
 if os.path.exists(f"{back_up_folder}/answer.json"):
     with open(f"{back_up_folder}/answer.json", "r") as f:
@@ -59,22 +77,27 @@ else:
     AnswerIgnoreDict = dict()
 ###############################################################
 
+
 ####################### Helper Utils ##########################
 def store_answer():
     with open(f"{back_up_folder}/answer.json", "w") as f:
         json.dump(AnswerDict, f)
 
+
 def store_user():
     with open(f"{back_up_folder}/user.json", "w") as f:
         json.dump(UserDict, f)
+
 
 def store_status():
     with open(f"{back_up_folder}/reorder_status.json", "w") as f:
         json.dump(ReorderStatus, f)
 
+
 def store_ignore():
     with open(f"{back_up_folder}/answer_ignore.json", "w") as f:
         json.dump(AnswerIgnoreDict, f)
+
 
 def add_submit(ques_name, ques_idx):
     ques_idx = int(ques_idx)
@@ -88,10 +111,11 @@ def add_submit(ques_name, ques_idx):
         store_status()
     store_answer()
 
+
 def add_ignore(ques_name, ques_idx, autoIgnore):
     if not isinstance(ques_idx, list):
         ques_idx = [ques_idx]
-    
+
     for i in range(len(ques_idx)):
         ques_idx[i] = int(ques_idx[i])
 
@@ -105,6 +129,7 @@ def add_ignore(ques_name, ques_idx, autoIgnore):
                 AnswerIgnoreDict[ques_name].remove(idx)
     store_ignore()
 
+
 def add_user(user, ques_name):
     if not UserDict.get(user, False):
         UserDict[user] = [ques_name]
@@ -114,6 +139,7 @@ def add_user(user, ques_name):
             UserDict[user] = sorted(UserDict[user])
     store_user()
 
+
 def clear_submit_helper(ques_name, ques_idx):
     if AnswerDict.get(ques_name, False):
         if ques_idx in AnswerDict[ques_name]:
@@ -122,6 +148,7 @@ def clear_submit_helper(ques_name, ques_idx):
         print(f"Question name: {ques_name} not exist")
     store_answer()
 
+
 def clear_ignore_helper(ques_name, ques_idx):
     if AnswerIgnoreDict.get(ques_name, False):
         if ques_idx in AnswerIgnoreDict[ques_name]:
@@ -129,6 +156,7 @@ def clear_ignore_helper(ques_name, ques_idx):
     else:
         print(f"Question name: {ques_name} not exist")
     store_ignore()
+
 
 def index2info(lst_idxs):
     info = {
@@ -140,17 +168,16 @@ def index2info(lst_idxs):
     for idx in lst_idxs:
         image_path = DictImagePath[idx]["image_path"]
         data_part, video_id, frame_id = (
-            image_path.replace("/data/KeyFrames/", "").replace(".webp", "").split("/")
+            image_path.replace("/data/Keyframes/", "").replace(".jpg", "").split("/")
         )
         key = f"{data_part}_{video_id}".replace("_extra", "")
-        if "extra" not in data_part:
-            frame_id = KeyframesMapper[key][str(int(frame_id))]
         frame_id = int(frame_id)
 
         info["lst_keyframe_idxs"].append(frame_id)
         info["lst_keyframe_paths"].append(image_path)
         info["lst_video_idxs"].append(key)
     return info
+
 
 def check_owned_all(username):
     # return all questions after getting checked ownership
@@ -172,19 +199,10 @@ def check_owned_all(username):
     print(f"res: {checked_ques}")
     return checked_ques
 
+
 def check_ignore():
     return list(AnswerIgnoreDict.keys())
-###############################################################
 
-# Define Pydantic models for request bodies
-class UserRequest(BaseModel):
-    user: str
-
-class UsernameRequest(BaseModel):
-    username: str
-
-class QuestionNameRequest(BaseModel):
-    questionName: str
 
 ##################### Submit ##################################
 @sio.event
@@ -198,6 +216,7 @@ async def submit(sid, data):
     result = {"questionName": ques_name, "data": index2info(AnswerDict[ques_name])}
     await sio.emit("submit", result)
 
+
 @sio.event
 async def clearsubmit(sid, data):
     print("clear submit")
@@ -206,6 +225,7 @@ async def clearsubmit(sid, data):
     clear_submit_helper(ques_name, ques_idx)
     result = {"questionName": ques_name, "data": index2info(AnswerDict[ques_name])}
     await sio.emit("clearsubmit", result)
+
 
 ##################### Ignore #################################
 @sio.event
@@ -217,14 +237,19 @@ async def ignore(sid, data):
     result = {"questionName": ques_name, "data": AnswerIgnoreDict[ques_name]}
     await sio.emit("ignore", result)
 
+
 @sio.event
 async def clearignore(sid, data):
     print("clear ignore")
     ques_name = data["questionName"]
     ques_idx = data["idx"]
     clear_ignore_helper(ques_name, ques_idx)
-    result = {"questionName": ques_name, "data": index2info(AnswerIgnoreDict[ques_name])}
+    result = {
+        "questionName": ques_name,
+        "data": index2info(AnswerIgnoreDict[ques_name]),
+    }
     await sio.emit("clearsubmit", result)
+
 
 ##################### Reorder #################################
 @sio.event
@@ -235,13 +260,14 @@ async def reorder(sid, data):
     if AnswerDict.get(ques_name, False):
         AnswerDict[ques_name] = lst_idxs
         store_answer()
-    
+
     # Reset status of active_reorder once received reroder
     ReorderStatus[ques_name]["status"] = False
     ReorderStatus[ques_name]["owner"] = ""
 
     result = {"questionName": ques_name, "data": index2info(AnswerDict[ques_name])}
     await sio.emit("reorder", result)
+
 
 @sio.event
 async def activereorder(sid, data):
@@ -265,6 +291,7 @@ async def activereorder(sid, data):
         status["is_accepted"] = True
         await sio.emit("activereorder", status)
 
+
 @sio.event
 async def viewsubmitted(sid, data):
     print("view submitted")
@@ -275,10 +302,12 @@ async def viewsubmitted(sid, data):
     else:
         await sio.emit("viewsubmitted", {})
 
+
 @app.get("/getallques")
 async def get_all_ques():
     all_ques = sorted(list(AnswerDict.keys()))
     return all_ques
+
 
 @app.post("/getsubmitques")
 async def get_submit_ques(request: UserRequest):
@@ -288,15 +317,18 @@ async def get_submit_ques(request: UserRequest):
     else:
         return []
 
+
 @app.post("/getquestions")
 async def get_questions(request: UsernameRequest):
     username = request.username
     checked_ques = check_owned_all(username)
     return checked_ques
 
+
 @app.post("/getignoredquestions")
 async def get_ignored_questions():
     return check_ignore()
+
 
 @app.post("/getignore")
 async def get_ignore(request: QuestionNameRequest):
@@ -307,9 +339,10 @@ async def get_ignore(request: QuestionNameRequest):
         result = {"questionName": ques_name, "data": []}
     return result
 
+
 # Create combined ASGI application
 socket_app = socketio.ASGIApp(sio, app)
 
 # Running app
 if __name__ == "__main__":
-    uvicorn.run(socket_app, host="0.0.0.0", port=8080)
+    uvicorn.run(socket_app, host="0.0.0.0", port=8081)

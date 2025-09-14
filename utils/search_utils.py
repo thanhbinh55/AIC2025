@@ -7,7 +7,7 @@ def group_result_by_video(lst_scores, list_ids, list_image_paths):
     result_dict = dict()
     for i, image_path in enumerate(list_image_paths):
         data_part, video_id, frame_id = (
-            image_path.replace("/frontend/public/data/Keyframes/", "").replace(".jpg", "").split("/")
+            image_path.replace("/data/Keyframes/", "").replace(".jpg", "").split("/")
         )
         key = f"{data_part}_{video_id}".replace("_extract", "")
 
@@ -55,7 +55,7 @@ def search_by_filter(
         for idx in ignore_index:
             image_path = DictImagePath[idx]["image_path"]
             data_part, video_id, frame_id = (
-                image_path.replace("/frontend/public/data/Keyframes/", "")
+                image_path.replace("/data/Keyframes/", "")
                 .replace(".jpg", "")
                 .split("/")
             )
@@ -136,7 +136,7 @@ def search_by_filter(
 
     for i, image_path in enumerate(list_image_paths):
         data_part, video_id, frame_id = (
-            image_path.replace("/frontend/public/data/Keyframes/", "").replace(".jpg", "").split("/")
+            image_path.replace("/data/Keyframes/", "").replace(".jpg", "").split("/")
         )
         key = f"{data_part}_{video_id}".replace("_extra", "")
 

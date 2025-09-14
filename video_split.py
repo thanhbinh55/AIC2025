@@ -15,10 +15,8 @@ class VideoSplit:
         self.list_vidieo_path = []
         for folder in list_vidieo_folder:
             self.list_vidieo_path += glob(folder + "/*.txt")
-        # self.all_vidieo_name = list(map(lambda x: '_'.join([x[34:37], x[-8:-4]]), self.list_vidieo_path))
-        self.all_vidieo_name = [
-            os.path.basename(os.path.dirname(x)) for x in self.list_vidieo_path
-        ]
+        self.all_vidieo_name = []
+        self.all_vidieo_name = list(map(lambda x: '_'.join([x[34:39], x[-8:-4]]), self.list_vidieo_path))
 
     def generate_tag_based(self, n=4):
         vectorizer = TfidfVectorizer(

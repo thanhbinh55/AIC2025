@@ -19,3 +19,4 @@ transformers
 sentence-transformers
 rank-bm25
 einops==0.8.1
+python-socketio==5.13.0
