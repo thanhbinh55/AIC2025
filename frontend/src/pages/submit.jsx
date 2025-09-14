@@ -13,7 +13,7 @@ import {
 import FullScreen from "../components/FullScreen";
 import Questions from "../components/Questions";
 import Lock from "../components/Lock";
-// import download from "../helper/download";
+import download from "../helper/download";
 import Switch from "../components/Switch";
 
 const io = require("socket.io-client");
@@ -85,9 +85,9 @@ function submit() {
       .catch((e) => console.log(e));
   };
 
-  // const socketSubmit = (res) => {
-  //   getOwnedQuestions(username);
-  // };
+  const socketSubmit = (res) => {
+    getOwnedQuestions(username);
+  };
 
   useEffect(() => {
     if (
@@ -101,7 +101,7 @@ function submit() {
       getOwnedQuestions(localStorage.getItem("username"));
     }
 
-    // socket.on("submit", socketSubmit);
+    socket.on("submit", socketSubmit);
 
     return () => {
       // socket.removeAllListeners("submit");
@@ -294,14 +294,14 @@ function submit() {
             setIsShown={setIsShown}
           />
         )}
-        {/* <ImageListSubmit
-        imagepath={'/tree.jpg'}
-        id={1}
-        id_show={1}
-        toggleFullScreen={() => {}}
-      /> */}
+        <ImageListSubmit
+          imagepath={'/tree.jpg'}
+          id={1}
+          id_show={1}
+          toggleFullScreen={() => {}}
+        />
         <div className="text-center ml-auto mb-4 flex gap-4 items-center">
-          {/* <button
+          <button
             onClick={() => {
               if (Object.keys(data).length !== 0) {
                 console.log(data.data.lst_video_idxs);
@@ -313,7 +313,7 @@ function submit() {
           transition-all hover:scale-90 border-sky-300/70 hover:text-slate-900 focus:text-slate-900"
           >
             Download
-          </button> */}
+          </button>
 
           <div className="questionname h-fit w-fit flex flex-col relative">
             <input

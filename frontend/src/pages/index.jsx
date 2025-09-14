@@ -104,9 +104,9 @@ function index() {
       .catch((e) => console.log(e));
   };
 
-  // const socketSubmit = (res) => {
-  //     getOwnedQuestions(username);
-  // };
+  const socketSubmit = (res) => {
+      getOwnedQuestions(username);
+  };
 
   useEffect(() => {
     if (
@@ -120,10 +120,10 @@ function index() {
       getOwnedQuestions(localStorage.getItem("username"));
     }
 
-    // socket.on("submit", socketSubmit);
+    socket.on("submit", socketSubmit);
 
     return () => {
-      // socket.removeAllListeners("submit");
+      socket.removeAllListeners("submit");
     };
   }, []);
 
@@ -789,7 +789,7 @@ function index() {
                 htmlFor="AutoIgnore"
                 className="cursor-pointer pl-0.5 text-slate-300"
               >
-                <span className="">AutoI</span>
+                <span className="">AutoIgnore</span>
               </label>
             </div>
             <div id="nomic" className="flex items-center ">
@@ -826,9 +826,10 @@ function index() {
                 htmlFor="Clipv2"
                 className="cursor-pointer pl-0.5 text-slate-300"
               >
-                <span className="text-orange-400">v2</span>
+                <span className="">CLIPv2</span>
               </label>
             </div>
+            {/* question dropdown */}
             <div className="h-fit w-fit flex flex-col relative">
               <input
                 placeholder="Questions"
@@ -932,7 +933,7 @@ function index() {
                 htmlFor="Feedback"
                 className="cursor-pointer pl-0.5 text-slate-300"
               >
-                <span className=" text-orange-400">Feedback</span>
+                <span className=" text-green-500">Feedback</span>
               </label>
             </div>
             <button

@@ -1,12 +1,11 @@
 //BACKEND
-export const web_url = "https://1e0e-35-229-64-73.ngrok-free.app";
+export const web_url = "http://localhost:8080";
 
 //SOCKET | DB SERVER
-export const socket_url =
-  "https://891c-2001-ee0-2e2-3824-fc3f-e7b1-d90f-d85f.ngrok-free.app";
+export const socket_url = "http://localhost:8081";
 
 //COMPETITION SUBMISSION SEVER
-export const server = "";
+export const server = "http://localhost:8081/submit";
 
 //SESSION ID FOR COMPETITION SUBMISSION SEVER
-export const session = "";
+export const session = "1";

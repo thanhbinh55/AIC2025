@@ -45,3 +45,15 @@ class TagRequest(BaseModel):
 
 class TranslateRequest(BaseModel):
     textquery: str
+
+# Define Pydantic models for request bodies
+class UserRequest(BaseModel):
+    user: str
+
+
+class UsernameRequest(BaseModel):
+    username: str
+
+
+class QuestionNameRequest(BaseModel):
+    questionName: str

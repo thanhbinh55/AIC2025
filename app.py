@@ -1,12 +1,8 @@
 import copy
-import time
 import json
 import numpy as np
-import requests
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from typing import List, Dict, Any, Optional
 
 from utils.parse_frontend import parse_data
@@ -95,16 +91,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
-
-# # Setup Jinja2Templates and static files
-# templates = Jinja2Templates(directory="templates")
-# app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# # Define API endpoints
-# @app.get("/", response_class=HTMLResponse)
-# async def root(request: Request):
-#     return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get("/data")
@@ -136,12 +124,15 @@ def text_search(request: TextSearchRequest):
     text_query = request.textquery
     range_filter = request.range_filter
 
+    print(f"search_space_index: {search_space_index}, k: {k}, query: {text_query}")
+
     index = None
-    if request.filter and request.id:
+    if request.filter and request.id: # 
         index = np.array(request.id).astype("int64")
         k = min(k, len(index))
         print("using index")
 
+    # create list frames to list to keep (all frames minus ignore frames)
     keep_index = None
     ignore_index = None
     if request.ignore and request.ignore_idxs:
@@ -168,7 +159,7 @@ def text_search(request: TextSearchRequest):
     else:
         model_type = "clipv2"
 
-    if request.filtervideo != 0 and request.videos:
+    if request.filtervideo != 0 and request.videos: # for temporal search, before or after specified keyframe
         print("filter video")
         mode = request.filtervideo
         prev_result = request.videos
@@ -279,14 +270,12 @@ def related_img(imgid: int):
     scene_idx = image_info["scene_idx"].split("/")
 
     video_info = copy.deepcopy(Sceneid2info[scene_idx[0]][scene_idx[1]])
-    # video_url = video_info["video_metadata"]["watch_url"]
     video_range = video_info[scene_idx[2]][scene_idx[3]]["shot_time"]
 
     near_keyframes = video_info[scene_idx[2]][scene_idx[3]]["lst_keyframe_paths"]
     near_keyframes.remove(image_path)
 
     data = {
-        # "video_url": video_url,
         "video_range": video_range,
         "near_keyframes": near_keyframes,
     }
@@ -318,9 +307,7 @@ def get_video_shot(imgid: Optional[str] = None):
         lst_keyframe_idxs = []
         for img_path in shots[shot_key]["lst_keyframe_paths"]:
             data_part, video_id, frame_id = (
-                img_path.replace("/frontend/public/data/Keyframes/", "")
-                .replace(".jpg", "")
-                .split("/")
+                img_path.replace("/data/Keyframes/", "").replace(".jpg", "").split("/")
             )
             key = f"{data_part}_{video_id}".replace("_extra", "")
             frame_id = int(frame_id)
