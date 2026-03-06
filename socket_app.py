@@ -1,16 +1,14 @@
-import os
 import json
+import os
+from typing import Any, Dict, List
+
 import socketio
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict, Any
-from utils.models import (
-    UserRequest,
-    UsernameRequest,
-    QuestionNameRequest
-)
+
+from utils.models import QuestionNameRequest, UsernameRequest, UserRequest
 
 # Create FastAPI app
 app = FastAPI()

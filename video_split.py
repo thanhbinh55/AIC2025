@@ -1,10 +1,11 @@
+import math
 import os
 import random
-import numpy as np
 from glob import glob
+
+import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
-import math
 
 
 class VideoSplit:
@@ -16,7 +17,9 @@ class VideoSplit:
         for folder in list_vidieo_folder:
             self.list_vidieo_path += glob(folder + "/*.txt")
         self.all_vidieo_name = []
-        self.all_vidieo_name = list(map(lambda x: '_'.join([x[34:39], x[-8:-4]]), self.list_vidieo_path))
+        self.all_vidieo_name = list(
+            map(lambda x: "_".join([x[34:39], x[-8:-4]]), self.list_vidieo_path)
+        )
 
     def generate_tag_based(self, n=4):
         vectorizer = TfidfVectorizer(

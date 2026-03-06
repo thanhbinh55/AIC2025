@@ -1,5 +1,4 @@
 import googletrans
-import asyncio
 
 
 class Translation:
