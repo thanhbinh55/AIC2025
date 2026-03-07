@@ -1,14 +1,25 @@
 import copy
+
 import numpy as np
+
 from utils.combine_utils import merge_searching_results_by_addition
+
+
+def _parse_keyframe_path(image_path):
+    """Parse keyframe path to (data_part, video_id, frame_id). Supports both
+    /data/Keyframes/... and /static/images/Keyframes/... formats.
+    """
+    s = image_path.replace(".jpg", "").strip("/")
+    parts = s.split("/")
+    if len(parts) >= 3:
+        return parts[-3], parts[-2], parts[-1]
+    raise ValueError(f"Unexpected image_path format: {image_path!r}")
 
 
 def group_result_by_video(lst_scores, list_ids, list_image_paths):
     result_dict = dict()
     for i, image_path in enumerate(list_image_paths):
-        data_part, video_id, frame_id = (
-            image_path.replace("/data/Keyframes/", "").replace(".jpg", "").split("/")
-        )
+        data_part, video_id, frame_id = _parse_keyframe_path(image_path)
         key = f"{data_part}_{video_id}".replace("_extract", "")
 
         frame_id = int(frame_id)
@@ -54,12 +65,10 @@ def search_by_filter(
         ignore_videos = dict()
         for idx in ignore_index:
             image_path = DictImagePath[idx]["image_path"]
-            data_part, video_id, frame_id = (
-                image_path.replace("/data/Keyframes/", "")
-                .replace(".jpg", "")
-                .split("/")
+            data_part, video_id, _ = _parse_keyframe_path(image_path)
+            key = f"{data_part}_{video_id}".replace("_extract", "").replace(
+                "_extra", ""
             )
-            key = f"{data_part}_{video_id}".replace("_extra", "")
             if ignore_videos.get(key, False):
                 ignore_videos[key].append(idx)
             else:
@@ -135,10 +144,8 @@ def search_by_filter(
         )
 
     for i, image_path in enumerate(list_image_paths):
-        data_part, video_id, frame_id = (
-            image_path.replace("/data/Keyframes/", "").replace(".jpg", "").split("/")
-        )
-        key = f"{data_part}_{video_id}".replace("_extra", "")
+        data_part, video_id, frame_id = _parse_keyframe_path(image_path)
+        key = f"{data_part}_{video_id}".replace("_extract", "").replace("_extra", "")
 
         result_dict[key]["video_info"]["lst_keyframe_paths"].append(image_path)
         result_dict[key]["video_info"]["lst_idxs"].append(int(list_ids[i]))

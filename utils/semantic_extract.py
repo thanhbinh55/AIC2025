@@ -1,15 +1,16 @@
-import os
+import gc
 import glob
-import torch
 import json
-import numpy as np
+import os
 import sys
 from typing import List
-import torch.nn.functional as F
+
 import faiss
-from transformers import AutoTokenizer, AutoModel
-import gc
+import numpy as np
+import torch
+import torch.nn.functional as F
 from tqdm import tqdm
+from transformers import AutoModel, AutoTokenizer
 
 
 def GET_PROJECT_ROOT():

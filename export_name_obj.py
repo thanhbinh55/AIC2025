@@ -9,5 +9,4 @@ def convert_objects_to_js(input_file, output_file):
         f.write("];\n")
 
 
-# Gọi hàm với tên file tương ứng
 convert_objects_to_js("./dict/tag/tag_list.txt", "./frontend/src/helper/words.js")

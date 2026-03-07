@@ -1,5 +1,6 @@
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, field_validator
 
 
 # Define Pydantic models for request validation
@@ -15,7 +16,18 @@ class TextSearchRequest(BaseModel):
     ignore: Optional[bool] = False
     ignore_idxs: Optional[List[int]] = None
     filtervideo: int = 0
-    videos: Optional[Dict[str, Any]] = None
+    videos: Optional[List[Dict[str, Any]]] = None
+
+    @field_validator("videos", mode="before")
+    @classmethod
+    def videos_accept_dict_or_list(cls, v: Any) -> Optional[List[Dict[str, Any]]]:
+        if v is None:
+            return None
+        if isinstance(v, list):
+            return v
+        if isinstance(v, dict):
+            return None  # dict (vd. {}) từ FE → coi như không có kết quả trước
+        return None
 
 
 class PanelSearchRequest(BaseModel):
@@ -45,6 +57,7 @@ class TagRequest(BaseModel):
 
 class TranslateRequest(BaseModel):
     textquery: str
+
 
 # Define Pydantic models for request bodies
 class UserRequest(BaseModel):

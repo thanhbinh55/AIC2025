@@ -1,18 +1,16 @@
-import re
-import os
-import open_clip
-import torch
 import json
-import glob
+
 import faiss
 import numpy as np
+import open_clip
+import torch
 from sentence_transformers import SentenceTransformer
 
-from utils.nlp_processing import Translation
 from utils.combine_utils import merge_searching_results_by_addition
+from utils.nlp_processing import Translation
+from utils.object_retrieval_engine.object_retrieval import object_retrieval
 from utils.ocr_retrieval_engine.ocr_retrieval import ocr_retrieval
 from utils.semantic_embed.speech_retrieval import speech_retrieval
-from utils.object_retrieval_engine.object_retrieval import object_retrieval
 
 
 class MyFaiss:
@@ -75,10 +73,8 @@ class MyFaiss:
         if model_type == "nomic":
             try:
                 # Use local nomic model instead of API
-                sentence = [f'search_query: {text}']
-                text_features = self.nomic_model.encode(
-                    sentence
-                )
+                sentence = [f"search_query: {text}"]
+                text_features = self.nomic_model.encode(sentence)
                 text_features = np.array(text_features).astype(np.float32)
             except Exception as e:
                 print(f"Error occurred while extracting text features: {e}")

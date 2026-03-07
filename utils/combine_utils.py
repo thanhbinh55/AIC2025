@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 
 def merge_searching_results(list_scores, list_indices, list_image_paths):
