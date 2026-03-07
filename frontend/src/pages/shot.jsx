@@ -16,7 +16,7 @@ const socket = io(socket_url, {
 });
 
 let videoId;
-function video() {
+function Video() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [videos, setVideos] = useState([]);
@@ -247,4 +247,4 @@ function video() {
   }
 }
 
-export default video;
+export default Video;

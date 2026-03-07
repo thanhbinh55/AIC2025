@@ -30,8 +30,8 @@ const socket = io(socket_url, {
   },
 });
 
-function index() {
-  const [videos, setVideos] = useState([]);
+function Index() {
+  const [videos, setVideos] = useState({});
   const [id, setId] = useState([]);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState(false);
@@ -1134,4 +1134,4 @@ function index() {
   );
 }
 
-export default index;
+export default Index;

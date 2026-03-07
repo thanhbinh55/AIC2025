@@ -63,7 +63,7 @@ function ImageList({
         {id_show}
       </div>
       <div
-        onClick={() => handleDelete(id)}
+        onClick={() => typeof handleDelete === "function" && handleDelete(id)}
         className={`rounded-full ring-red-400 hover:ring-2 hover:bg-red-400 hover:scale-90 transition cursor-pointer p-0.5 absolute top-0 right-0 bg-slate-300 text-slate-900 translate-x-1/4 -translate-y-1/4`}
       >
         <AiOutlineDelete className="w-5 h-5" />

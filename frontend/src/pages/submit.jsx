@@ -23,7 +23,7 @@ const socket = io(socket_url, {
     "ngrok-skip-browser-warning": "69420",
   },
 });
-function submit() {
+function Submit() {
   const [questionName, setQuestionName] = useState("");
   const [questions, setQuestions] = useState([]);
   const [questionsLoading, setQuestionsLoading] = useState(false);
@@ -295,7 +295,7 @@ function submit() {
           />
         )}
         <ImageListSubmit
-          imagepath={'/tree.jpg'}
+          imagepath={'/us_shareholder_bg.jpg'}
           id={1}
           id_show={1}
           toggleFullScreen={() => {}}
@@ -498,4 +498,4 @@ function submit() {
     </>
   );
 }
-export default submit;
+export default Submit;
