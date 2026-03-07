@@ -1,14 +1,16 @@
 import json
 import os
-from typing import Any, Dict, List
 
 import socketio
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
+from utils.logger_config import get_logger
 from utils.models import QuestionNameRequest, UsernameRequest, UserRequest
+from utils.search_utils import _parse_keyframe_path
+
+logger = get_logger(__name__)
 
 # Create FastAPI app
 app = FastAPI()
@@ -143,7 +145,7 @@ def clear_submit_helper(ques_name, ques_idx):
         if ques_idx in AnswerDict[ques_name]:
             AnswerDict[ques_name].remove(ques_idx)
     else:
-        print(f"Question name: {ques_name} not exist")
+        logger.warning("Question name: %s not exist", ques_name)
     store_answer()
 
 
@@ -152,7 +154,7 @@ def clear_ignore_helper(ques_name, ques_idx):
         if ques_idx in AnswerIgnoreDict[ques_name]:
             AnswerIgnoreDict[ques_name].remove(ques_idx)
     else:
-        print(f"Question name: {ques_name} not exist")
+        logger.warning("Question name: %s not exist", ques_name)
     store_ignore()
 
 
@@ -165,10 +167,8 @@ def index2info(lst_idxs):
     }
     for idx in lst_idxs:
         image_path = DictImagePath[idx]["image_path"]
-        data_part, video_id, frame_id = (
-            image_path.replace("/data/Keyframes/", "").replace(".jpg", "").split("/")
-        )
-        key = f"{data_part}_{video_id}".replace("_extra", "")
+        data_part, video_id, frame_id = _parse_keyframe_path(image_path)
+        key = f"{data_part}_{video_id}".replace("_extract", "").replace("_extra", "")
         frame_id = int(frame_id)
 
         info["lst_keyframe_idxs"].append(frame_id)
@@ -194,7 +194,7 @@ def check_owned_all(username):
         else:
             checked_ques.append({"question": ques, "owned": False})
 
-    print(f"res: {checked_ques}")
+    logger.debug("res: %s", checked_ques)
     return checked_ques
 
 
@@ -205,7 +205,7 @@ def check_ignore():
 ##################### Submit ##################################
 @sio.event
 async def submit(sid, data):
-    print("submit")
+    logger.info("submit")
     ques_name = data["questionName"]
     ques_idx = int(data["idx"])
     user = data["user"]
@@ -217,7 +217,7 @@ async def submit(sid, data):
 
 @sio.event
 async def clearsubmit(sid, data):
-    print("clear submit")
+    logger.info("clear submit")
     ques_name = data["questionName"]
     ques_idx = int(data["idx"])
     clear_submit_helper(ques_name, ques_idx)
@@ -228,7 +228,7 @@ async def clearsubmit(sid, data):
 ##################### Ignore #################################
 @sio.event
 async def ignore(sid, data):
-    print("ignore")
+    logger.info("ignore")
     ques_name = data["questionName"]
     ques_idx = data["idx"]
     add_ignore(ques_name, ques_idx, data["autoIgnore"])
@@ -238,7 +238,7 @@ async def ignore(sid, data):
 
 @sio.event
 async def clearignore(sid, data):
-    print("clear ignore")
+    logger.info("clear ignore")
     ques_name = data["questionName"]
     ques_idx = data["idx"]
     clear_ignore_helper(ques_name, ques_idx)
@@ -252,7 +252,7 @@ async def clearignore(sid, data):
 ##################### Reorder #################################
 @sio.event
 async def reorder(sid, data):
-    print("re order")
+    logger.info("re order")
     ques_name = data["questionName"]
     lst_idxs = data["data"]["lst_idxs"]
     if AnswerDict.get(ques_name, False):
@@ -269,7 +269,7 @@ async def reorder(sid, data):
 
 @sio.event
 async def activereorder(sid, data):
-    print("active reorder")
+    logger.info("active reorder")
     ques_name = data["questionName"]
     user = data["user"]
     is_admin = data["isAdmin"]
@@ -280,7 +280,7 @@ async def activereorder(sid, data):
     }
     # If is_admin: pass
     if ReorderStatus[ques_name]["status"] and not is_admin:
-        print("Reorder an active question error !!!!")
+        logger.error("Reorder an active question error")
         # emit's first argument must be the same name as that of the channel on client-side
         await sio.emit("activereorder", status)
     else:
@@ -292,13 +292,25 @@ async def activereorder(sid, data):
 
 @sio.event
 async def viewsubmitted(sid, data):
-    print("view submitted")
+    logger.info("view submitted")
     ques_name = data["questionName"]
     if AnswerDict.get(ques_name, False):
         result = {"questionName": ques_name, "data": index2info(AnswerDict[ques_name])}
         await sio.emit("viewsubmitted", result)
     else:
         await sio.emit("viewsubmitted", {})
+
+
+@app.get("/submit")
+async def submit_get(item: str = "", frame: str = "", session: str = ""):
+    """HTTP GET /submit for competition submission (FE calls with ?item=...&frame=...&session=...)."""
+    if not item or not frame:
+        return {"description": "Missing item or frame", "status": "error"}
+    # Có thể lưu submission vào file/DB tại đây nếu cần
+    return {
+        "description": f"Submitted item={item}, frame={frame}, session={session}",
+        "status": "success",
+    }
 
 
 @app.get("/getallques")
@@ -343,4 +355,9 @@ socket_app = socketio.ASGIApp(sio, app)
 
 # Running app
 if __name__ == "__main__":
-    uvicorn.run(socket_app, host="0.0.0.0", port=8081)
+    uvicorn.run(
+        "socket_app:socket_app",
+        host="0.0.0.0",
+        port=8081,
+        reload=True,
+    )

@@ -1,23 +1,31 @@
 import copy
 import json
-import numpy as np
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Dict, Any, Optional
+from typing import Optional
 
-from utils.parse_frontend import parse_data
-from utils.faiss_processing import MyFaiss
-from utils.context_encoding import VisualEncoding
-from utils.semantic_embed.tag_retrieval import tag_retrieval
+import numpy as np
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from utils.combine_utils import merge_searching_results_by_addition
-from utils.search_utils import group_result_by_video, search_by_filter
+from utils.context_encoding import VisualEncoding
+from utils.faiss_processing import MyFaiss
+from utils.logger_config import get_logger
 from utils.models import (
-    TextSearchRequest,
-    PanelSearchRequest,
     FeedbackRequest,
+    PanelSearchRequest,
     TagRequest,
+    TextSearchRequest,
     TranslateRequest,
 )
+from utils.parse_frontend import parse_data
+from utils.search_utils import (
+    _parse_keyframe_path,
+    group_result_by_video,
+    search_by_filter,
+)
+from utils.semantic_embed.tag_retrieval import tag_retrieval
+
+logger = get_logger(__name__)
 
 # Define paths
 json_path = "dict/id2img.json"
@@ -108,7 +116,7 @@ def index():
 
 @app.get("/imgsearch")
 def image_search(k: int, imgid: int):
-    print("image search")
+    logger.info("image search")
     lst_scores, list_ids, _, list_image_paths = CosineFaiss.image_search(imgid, k=k)
     data = group_result_by_video(lst_scores, list_ids, list_image_paths)
     return data
@@ -116,7 +124,7 @@ def image_search(k: int, imgid: int):
 
 @app.post("/textsearch")
 def text_search(request: TextSearchRequest):
-    print("text search")
+    logger.info("text search")
     search_space_index = request.search_space
     k = request.k
     nomic = request.nomic
@@ -124,21 +132,26 @@ def text_search(request: TextSearchRequest):
     text_query = request.textquery
     range_filter = request.range_filter
 
-    print(f"search_space_index: {search_space_index}, k: {k}, query: {text_query}")
+    logger.debug(
+        "search_space_index: %s, k: %s, query: %s",
+        search_space_index,
+        k,
+        text_query,
+    )
 
     index = None
-    if request.filter and request.id: # 
+    if request.filter and request.id:  #
         index = np.array(request.id).astype("int64")
         k = min(k, len(index))
-        print("using index")
+        logger.debug("using index")
 
-    # create list frames to list to keep (all frames minus ignore frames)
+    # Create list frames to list to keep (all frames minus ignore frames)
     keep_index = None
     ignore_index = None
     if request.ignore and request.ignore_idxs:
         ignore_index = get_related_ignore(np.array(request.ignore_idxs).astype("int64"))
         keep_index = np.delete(TotalIndexList, ignore_index)
-        print("using ignore")
+        logger.debug("using ignore")
 
     if keep_index is not None:
         if index is not None:
@@ -159,8 +172,10 @@ def text_search(request: TextSearchRequest):
     else:
         model_type = "clipv2"
 
-    if request.filtervideo != 0 and request.videos: # for temporal search, before or after specified keyframe
-        print("filter video")
+    if (
+        request.filtervideo != 0 and request.videos
+    ):  # for temporal search, before or after specified keyframe
+        logger.debug("filter video")
         mode = request.filtervideo
         prev_result = request.videos
         data = search_by_filter(
@@ -197,6 +212,9 @@ def text_search(request: TextSearchRequest):
             lst_scores, list_ids, _, list_image_paths = CosineFaiss.text_search(
                 text_query, index=index, k=k, model_type=model_type
             )
+        logger.debug("List scores: %s", lst_scores)
+        logger.debug("List ids: %s", list_ids)
+        logger.debug("List image paths: %s", list_image_paths)
         data = group_result_by_video(lst_scores, list_ids, list_image_paths)
 
     return data
@@ -204,7 +222,7 @@ def text_search(request: TextSearchRequest):
 
 @app.post("/panel")
 def panel(request: PanelSearchRequest):
-    print("panel search")
+    logger.info("panel search")
     k = request.k
     search_space_index = request.search_space
 
@@ -217,7 +235,7 @@ def panel(request: PanelSearchRequest):
     if request.ignore and request.ignore_idxs:
         ignore_index = get_related_ignore(np.array(request.ignore_idxs).astype("int64"))
         keep_index = np.delete(TotalIndexList, ignore_index)
-        print("using ignore")
+        logger.debug("using ignore")
 
     if keep_index is not None:
         if index is not None:
@@ -255,7 +273,7 @@ def panel(request: PanelSearchRequest):
 
 @app.post("/getrec")
 def getrec(request: TagRequest):
-    print("get tag recommendation")
+    logger.info("get tag recommendation")
     k = 50
     text_query = request.text
     tag_outputs = TagRecommendation(text_query, k)
@@ -264,7 +282,7 @@ def getrec(request: TagRequest):
 
 @app.get("/relatedimg")
 def related_img(imgid: int):
-    print("related image")
+    logger.info("related image")
     image_info = DictImagePath[imgid]
     image_path = image_info["image_path"]
     scene_idx = image_info["scene_idx"].split("/")
@@ -284,7 +302,7 @@ def related_img(imgid: int):
 
 @app.get("/getvideoshot")
 def get_video_shot(imgid: Optional[str] = None):
-    print("get video shot")
+    logger.info("get video shot")
 
     if imgid == "undefined" or imgid is None:
         return {}
@@ -306,10 +324,7 @@ def get_video_shot(imgid: Optional[str] = None):
     for shot_key in shots.keys():
         lst_keyframe_idxs = []
         for img_path in shots[shot_key]["lst_keyframe_paths"]:
-            data_part, video_id, frame_id = (
-                img_path.replace("/data/Keyframes/", "").replace(".jpg", "").split("/")
-            )
-            key = f"{data_part}_{video_id}".replace("_extra", "")
+            data_part, video_id, frame_id = _parse_keyframe_path(img_path)
             frame_id = int(frame_id)
             lst_keyframe_idxs.append(frame_id)
         shots[shot_key]["lst_idxs"] = shots[shot_key]["lst_keyframe_idxs"]
