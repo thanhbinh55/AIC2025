@@ -52,6 +52,7 @@ __pycache__/
 *.so
 venv/
 env/
+.venv/
 
 # Misc
 .tmp/
@@ -61,8 +62,9 @@ env/
 *.zip
 test.ipynb
 
-
+# Keyframes data
 dict/
-frontend/public/data/Keyframes/
-static/data/
-images/
+frontend/public/static/images/Keyframes/
+
+# Cursor IDE
+.cursor/

@@ -1,22 +1,23 @@
-import googletrans
+from deep_translator import GoogleTranslator
 
 
 class Translation:
     def __init__(self, from_lang="vi", to_lang="en"):
-        # The class Translation is a wrapper for the two translation libraries, googletrans and translate.
+        # Wrapper for translation; uses deep_translator (Google) to avoid
+        # conflicts with httpx/httpcore used by transformers/huggingface_hub.
+        self.__from_lang = from_lang
         self.__to_lang = to_lang
-        self.translator = googletrans.Translator()
+        self.translator = GoogleTranslator(source=from_lang, target=to_lang)
 
     def preprocessing(self, text):
         return text.lower()
 
     def __call__(self, text):
         """
-        The function takes in a text and preprocesses it before translation
+        Preprocesses text then translates it.
 
         :param text: The text to be translated
         :return: The translated text.
         """
         text = self.preprocessing(text)
-        result = self.translator.translate(text, dest=self.__to_lang)
-        return result.text
+        return self.translator.translate(text)
