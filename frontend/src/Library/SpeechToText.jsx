@@ -19,7 +19,7 @@ export default function AnyComponent({ setQuery }) {
     },
   });
 
-  if (error) alert("Web Speech API is not available in this browser 🤷‍");
+  // if (error) alert("Web Speech API is not available in this browser 🤷‍");
 
   // useEffect(() => {
   //   if (results.length > 0) {
