@@ -12,6 +12,6 @@
 
 // Thay tất cả bằng cái link ngrok mà bạn nhận được
 export const web_url = "https://brachycerous-nonpliantly-kaya.ngrok-free.dev";
-export const socket_url = "https://brachycerous-nonpliantly-kaya.ngrok-free.dev";
+export const socket_url = "https://rely-secretariat-aerospace-com.trycloudflare.com";
 export const server = "https://brachycerous-nonpliantly-kaya.ngrok-free.dev/submit";
 export const session = "1";

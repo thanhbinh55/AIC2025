@@ -937,6 +937,7 @@ function Index() {
               </label>
             </div>
             <button
+              id="send"
               onClick={() => {
                 sendFeedback();
               }}
